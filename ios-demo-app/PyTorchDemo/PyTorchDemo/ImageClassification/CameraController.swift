@@ -2,7 +2,7 @@ import AVFoundation
 import Foundation
 
 class CameraController: NSObject {
-    var videoCaptureCompletionBlock: (([Float32]?, CameraControllerError?) -> Void)?
+    var videoCaptureCompletionBlock: (([Float32]?, CVImageBuffer?, CameraControllerError?) -> Void)?
     private let inputWidth = 224
     private let inputHeight = 224
     private var captureSession = AVCaptureSession()
@@ -20,7 +20,7 @@ class CameraController: NSObject {
         func reportError(error: CameraControllerError) {
             DispatchQueue.main.async {
                 if let callback = self.videoCaptureCompletionBlock {
-                    callback(nil, error)
+                    callback(nil, nil, error)
                 }
             }
         }
@@ -95,7 +95,7 @@ class CameraController: NSObject {
         let center = NotificationCenter.default
         let mainQueue = OperationQueue.main
         center.addObserver(forName: .AVCaptureSessionRuntimeError, object: nil, queue: mainQueue) { _ in
-            callback(nil, .sessionError)
+            callback(nil, nil, .sessionError)
         }
     }
 
@@ -107,14 +107,14 @@ class CameraController: NSObject {
 extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
     func captureOutput(_: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
         connection.videoOrientation = .portrait
-        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+        guard let pixelBuffer:CVImageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
             return
         }
         guard let normalizedBuffer = pixelBuffer.normalized(inputWidth, inputHeight) else {
             return
         }
         if let callback = videoCaptureCompletionBlock {
-            callback(normalizedBuffer, nil)
+            callback(normalizedBuffer, pixelBuffer, nil)
         }
     }
 }

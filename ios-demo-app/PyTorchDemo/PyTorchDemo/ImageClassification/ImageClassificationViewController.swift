@@ -1,6 +1,6 @@
 import AVFoundation
 import UIKit
-
+import Vision
 class ImageClassificationViewController: ViewController {
     @IBOutlet var cameraView: CameraPreviewView!
     @IBOutlet var bottomView: ImageClassificationResultView!
@@ -10,17 +10,21 @@ class ImageClassificationViewController: ViewController {
     private var cameraController = CameraController()
     private let delayMs: Double = 500
     private var prevTimestampMs: Double = 0.0
-
+    // private lazy var previewLayer = AVCaptureVideoPreviewLayer(session: self.captureSession)
+    // private var drawings: [CAShapeLayer] = []
     override func viewDidLoad() {
         super.viewDidLoad()
         bottomView.config(resultCount: 3)
         cameraController.configPreviewLayer(cameraView)
-        cameraController.videoCaptureCompletionBlock = { [weak self] buffer, error in
+        cameraController.videoCaptureCompletionBlock = { [weak self] buffer, _pixelBuffer, error in
             guard let strongSelf = self else { return }
             if error != nil {
                 strongSelf.showAlert(error)
                 return
             }
+            
+            self!.detectFace(in: _pixelBuffer!)
+            
             guard let pixelBuffer = buffer else { return }
             let currentTimestamp = CACurrentMediaTime()
             if (currentTimestamp - strongSelf.prevTimestampMs) * 1000 <= strongSelf.delayMs { return }
@@ -36,7 +40,39 @@ class ImageClassificationViewController: ViewController {
             }
         }
     }
-
+    
+//    https://medium.com/onfido-tech/live-face-tracking-on-ios-using-vision-framework-adf8a1799233
+    private func detectFace(in image: CVPixelBuffer) {
+        let faceDetectionRequest = VNDetectFaceLandmarksRequest(completionHandler: { (request: VNRequest, error: Error?) in
+            DispatchQueue.main.async {
+                if let results = request.results as? [VNFaceObservation], results.count > 0 {
+                    print("did detect \(results.count) face(s)")
+                } else {
+                    print("did not detect any face")
+                }
+            }
+        })
+        let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: image, orientation: .leftMirrored, options: [:])
+        try? imageRequestHandler.perform([faceDetectionRequest])
+    }
+    
+//    private func handleFaceDetectionResults(_ observedFaces: [VNFaceObservation]) {
+//        self.clearDrawings()
+//        let facesBoundingBoxes: [CAShapeLayer] = observedFaces.map({ (observedFace: VNFaceObservation) -> CAShapeLayer in
+//            let faceBoundingBoxOnScreen = self.previewLayer.layerRectConverted(fromMetadataOutputRect: observedFace.boundingBox)
+//            let faceBoundingBoxPath = CGPath(rect: faceBoundingBoxOnScreen, transform: nil)
+//            let faceBoundingBoxShape = CAShapeLayer()
+//            faceBoundingBoxShape.path = faceBoundingBoxPath
+//            faceBoundingBoxShape.fillColor = UIColor.clear.cgColor
+//            faceBoundingBoxShape.strokeColor = UIColor.green.cgColor
+//            return faceBoundingBoxShape
+//        })
+//        facesBoundingBoxes.forEach({ faceBoundingBox in self.view.layer.addSublayer(faceBoundingBox) })
+//        self.drawings = facesBoundingBoxes
+//    }
+//    private func clearDrawings() {
+//        self.drawings.forEach({ drawing in drawing.removeFromSuperlayer() })
+//    }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: false)
