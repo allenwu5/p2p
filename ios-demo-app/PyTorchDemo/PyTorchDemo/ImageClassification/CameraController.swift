@@ -2,15 +2,17 @@ import AVFoundation
 import Foundation
 
 class CameraController: NSObject {
-    var videoCaptureCompletionBlock: (([Float32]?, CVImageBuffer?, CameraControllerError?) -> Void)?
+    var videoCaptureCompletionBlock: (([Float32]?, CVImageBuffer?, CameraPreviewView?, CameraControllerError?) -> Void)?
     private let inputWidth = 224
     private let inputHeight = 224
     private var captureSession = AVCaptureSession()
     private var videoOutput = AVCaptureVideoDataOutput()
     private var sessionQueue = DispatchQueue(label: "session")
     private var bufferQueue = DispatchQueue(label: "buffer")
+    private var previewView:CameraPreviewView? = nil
 
     func configPreviewLayer(_ previewView: CameraPreviewView) {
+        self.previewView = previewView
         previewView.previewLayer.session = captureSession
         previewView.previewLayer.connection?.videoOrientation = .portrait
         previewView.previewLayer.videoGravity = .resizeAspectFill
@@ -20,7 +22,7 @@ class CameraController: NSObject {
         func reportError(error: CameraControllerError) {
             DispatchQueue.main.async {
                 if let callback = self.videoCaptureCompletionBlock {
-                    callback(nil, nil, error)
+                    callback(nil, nil, self.previewView, error)
                 }
             }
         }
@@ -95,7 +97,7 @@ class CameraController: NSObject {
         let center = NotificationCenter.default
         let mainQueue = OperationQueue.main
         center.addObserver(forName: .AVCaptureSessionRuntimeError, object: nil, queue: mainQueue) { _ in
-            callback(nil, nil, .sessionError)
+            callback(nil, nil, nil, .sessionError)
         }
     }
 
@@ -114,7 +116,7 @@ extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
             return
         }
         if let callback = videoCaptureCompletionBlock {
-            callback(normalizedBuffer, pixelBuffer, nil)
+            callback(normalizedBuffer, pixelBuffer, self.previewView, nil)
         }
     }
 }
