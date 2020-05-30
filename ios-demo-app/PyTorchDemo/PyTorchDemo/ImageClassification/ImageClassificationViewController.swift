@@ -58,7 +58,9 @@ class ImageClassificationViewController: ViewController {
     private func handleFaceDetectionResults(_ observedFaces: [VNFaceObservation], previewView:CameraPreviewView) {
         self.clearDrawings()
         let facesBoundingBoxes: [CAShapeLayer] = observedFaces.flatMap({ (observedFace: VNFaceObservation) -> [CAShapeLayer] in
-            let faceBoundingBoxOnScreen = previewView.previewLayer.layerRectConverted(fromMetadataOutputRect: observedFace.boundingBox)
+            var faceBoundingBoxOnScreen = previewView.previewLayer.layerRectConverted(fromMetadataOutputRect: observedFace.boundingBox)
+            // FIXME: why dy = 22 ?
+            faceBoundingBoxOnScreen = faceBoundingBoxOnScreen.offsetBy(dx: 0, dy: 22)
             let faceBoundingBoxPath = CGPath(rect: faceBoundingBoxOnScreen, transform: nil)
             let faceBoundingBoxShape = CAShapeLayer()
             faceBoundingBoxShape.path = faceBoundingBoxPath
@@ -90,6 +92,10 @@ class ImageClassificationViewController: ViewController {
             faceFeaturesDrawings.append(eyeDrawing)
         }
         // draw other face features here
+        if let leftEye = landmarks.leftEye, let rightEye = landmarks.rightEye {
+            let eyeMaskDrawing = self.drawEyeMask(leftEye, rightEye, screenBoundingBox: screenBoundingBox)
+            faceFeaturesDrawings.append(eyeMaskDrawing)
+        }
         return faceFeaturesDrawings
     }
     
@@ -98,7 +104,7 @@ class ImageClassificationViewController: ViewController {
         let eyePathPoints = eye.normalizedPoints
             .map({ eyePoint in
                 CGPoint(
-                    x: eyePoint.y * screenBoundingBox.height + screenBoundingBox.origin.x,
+                    x: (1-eyePoint.y) * screenBoundingBox.height + screenBoundingBox.origin.x,
                     y: eyePoint.x * screenBoundingBox.width + screenBoundingBox.origin.y)
              })
         eyePath.addLines(between: eyePathPoints)
@@ -107,6 +113,37 @@ class ImageClassificationViewController: ViewController {
         eyeDrawing.path = eyePath
         eyeDrawing.fillColor = UIColor.clear.cgColor
         eyeDrawing.strokeColor = UIColor.green.cgColor
+        
+        return eyeDrawing
+    }
+    
+    private func drawEyeMask(_ leftEye: VNFaceLandmarkRegion2D, _ rightEye: VNFaceLandmarkRegion2D, screenBoundingBox: CGRect) -> CAShapeLayer {
+        let eyePath = CGMutablePath()
+        var eyePathPoints = leftEye.normalizedPoints
+            .map({ eyePoint in
+                CGPoint(
+                    x: (1-eyePoint.y) * screenBoundingBox.height + screenBoundingBox.origin.x,
+                    y: eyePoint.x * screenBoundingBox.width + screenBoundingBox.origin.y)
+             })
+        eyePath.addLines(between: eyePathPoints)
+        
+        eyePathPoints = rightEye.normalizedPoints
+            .map({ eyePoint in
+                CGPoint(
+                    x: (1-eyePoint.y) * screenBoundingBox.height + screenBoundingBox.origin.x,
+                    y: eyePoint.x * screenBoundingBox.width + screenBoundingBox.origin.y)
+             })
+        eyePath.addLines(between: eyePathPoints)
+        eyePath.closeSubpath()
+        
+        let rect = eyePath.boundingBoxOfPath
+        let path = CGMutablePath(rect: rect, transform: nil)
+        
+        let eyeDrawing = CAShapeLayer()
+        eyeDrawing.path = path
+        eyeDrawing.fillColor = UIColor.black.cgColor
+        eyeDrawing.strokeColor = UIColor.white.cgColor
+        eyeDrawing.lineWidth = 5.0
         
         return eyeDrawing
     }
