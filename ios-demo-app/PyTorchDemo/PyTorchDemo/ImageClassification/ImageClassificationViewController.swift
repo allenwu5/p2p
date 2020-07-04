@@ -11,8 +11,64 @@ class ImageClassificationViewController: ViewController {
     private let delayMs: Double = 500
     private var prevTimestampMs: Double = 0.0
     private var drawings: [CAShapeLayer] = []
+    @IBOutlet weak var drawingView: DrawingSegmentationView!
+    
+    // For image segmentation
+    // MARK - Core ML model
+    // DeepLabV3(iOS12+), DeepLabV3FP16(iOS12+), DeepLabV3Int8LUT(iOS12+)
+    private let segmentationModel = DeepLabV3Int8LUT()
+    var request: VNCoreMLRequest?
+    var visionModel: VNCoreMLModel?
+    var isInferencing = false
+    private let 👨‍🔧 = 📏()
+
+    // MARK: - Setup Core ML
+    func setUpModel() {
+        if let visionModel = try? VNCoreMLModel(for: segmentationModel.model) {
+            self.visionModel = visionModel
+            request = VNCoreMLRequest(model: visionModel, completionHandler: visionRequestDidComplete)
+            request?.imageCropAndScaleOption = .scaleFill
+        } else {
+            fatalError()
+        }
+    }
+    // prediction
+    func predict(with pixelBuffer: CVPixelBuffer) {
+        guard let request = request else { fatalError() }
+        
+        // vision framework configures the input size of image following our model's input configuration automatically
+        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+        try? handler.perform([request])
+    }
+    // post-processing
+    func visionRequestDidComplete(request: VNRequest, error: Error?) {
+        self.👨‍🔧.🏷(with: "endInference")
+        
+        if let observations = request.results as? [VNCoreMLFeatureValueObservation],
+            let segmentationmap = observations.first?.featureValue.multiArrayValue {
+            
+            let segmentationResultMLMultiArray = SegmentationResultMLMultiArray(mlMultiArray: segmentationmap)
+            DispatchQueue.main.async { [weak self] in
+                // update result
+                
+                self?.drawingView.segmentationmap = segmentationResultMLMultiArray
+                
+                // end of measure
+                self?.👨‍🔧.🎬🤚()
+                self?.isInferencing = false
+            }
+        } else {
+            // end of measure
+            self.👨‍🔧.🎬🤚()
+            isInferencing = false
+        }
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // For image segmentation
+        setUpModel()
+
         bottomView.config(resultCount: 3)
         cameraController.configPreviewLayer(cameraView)
         cameraController.videoCaptureCompletionBlock = { [weak self] buffer, _pixelBuffer, previewView, error in
@@ -21,6 +77,13 @@ class ImageClassificationViewController: ViewController {
                 strongSelf.showAlert(error)
                 return
             }
+            
+            // For image segmentation
+            self?.isInferencing = true
+            // start of measure
+            self?.👨‍🔧.🎬👏()
+            // predict!
+            self?.predict(with: _pixelBuffer!)
             
             self!.detectFace(in: _pixelBuffer!, in:previewView!)
             
