@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="j5v-bL-MiJ">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="j5v-bL-MiJ">
     <device id="retina5_9" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -241,7 +241,7 @@
                                         <rect key="frame" x="0.0" y="0.0" width="375" height="60"/>
                                         <subviews>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Image Classification" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0WJ-xb-Kn4">
-                                                <rect key="frame" x="100" y="18" width="175" height="24"/>
+                                                <rect key="frame" x="100" y="13" width="175" height="34"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <nil key="highlightedColor"/>
@@ -280,10 +280,9 @@
                                         </constraints>
                                     </view>
                                     <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="myB-Vc-CNu">
-                                        <rect key="frame" x="297" y="474" width="68" height="30"/>
+                                        <rect key="frame" x="365" y="474" width="0.0" height="30"/>
                                         <color key="backgroundColor" red="0.094117647058823528" green="0.094117647058823528" blue="0.094117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <constraints>
-                                            <constraint firstAttribute="width" constant="68" id="04K-8q-Jzw"/>
                                             <constraint firstAttribute="height" constant="30" id="Dw7-Sj-XkU"/>
                                         </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="12"/>
@@ -299,6 +298,7 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
+                                    <constraint firstItem="myB-Vc-CNu" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="xO8-Rl-ilf" secondAttribute="leading" constant="20" symbolic="YES" id="16B-mC-sCs"/>
                                     <constraint firstItem="goD-MS-wvF" firstAttribute="leading" secondItem="xO8-Rl-ilf" secondAttribute="leading" id="6XH-6v-9kN"/>
                                     <constraint firstAttribute="bottom" secondItem="rdH-jq-08L" secondAttribute="bottom" id="KWU-er-TQy"/>
                                     <constraint firstAttribute="trailing" secondItem="goD-MS-wvF" secondAttribute="trailing" id="M1U-pP-fh4"/>
@@ -311,14 +311,22 @@
                                     <constraint firstItem="jot-qV-InT" firstAttribute="centerX" secondItem="xO8-Rl-ilf" secondAttribute="centerX" id="ynX-lK-fSo"/>
                                 </constraints>
                             </view>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="SVe-aK-gOh" customClass="DrawingSegmentationView" customModule="PyTorchDemo" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="44" width="375" height="734"/>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
+                            <constraint firstItem="SVe-aK-gOh" firstAttribute="centerX" secondItem="xO8-Rl-ilf" secondAttribute="centerX" id="A0z-PU-GJq"/>
+                            <constraint firstItem="SVe-aK-gOh" firstAttribute="leading" secondItem="wFb-JL-rA3" secondAttribute="leadingMargin" constant="-16" id="BIR-1f-r4x"/>
                             <constraint firstItem="Off-k9-m5R" firstAttribute="bottom" secondItem="xO8-Rl-ilf" secondAttribute="bottom" id="G0A-1q-F59"/>
+                            <constraint firstItem="SVe-aK-gOh" firstAttribute="centerY" secondItem="wFb-JL-rA3" secondAttribute="centerY" constant="5" id="H8f-C5-aH7"/>
                             <constraint firstItem="goD-MS-wvF" firstAttribute="top" secondItem="Off-k9-m5R" secondAttribute="top" id="MPW-Ne-utg"/>
                             <constraint firstItem="xO8-Rl-ilf" firstAttribute="leading" secondItem="Off-k9-m5R" secondAttribute="leading" id="Rc9-Zq-SUb"/>
                             <constraint firstItem="xO8-Rl-ilf" firstAttribute="top" secondItem="Off-k9-m5R" secondAttribute="top" id="f1n-se-IPE"/>
                             <constraint firstItem="Off-k9-m5R" firstAttribute="trailing" secondItem="xO8-Rl-ilf" secondAttribute="trailing" id="fvF-Ls-MFE"/>
+                            <constraint firstItem="SVe-aK-gOh" firstAttribute="top" secondItem="Off-k9-m5R" secondAttribute="top" id="wgL-Xr-TfW"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Off-k9-m5R"/>
                     </view>
@@ -328,6 +336,7 @@
                         <outlet property="benchmarkLabel" destination="myB-Vc-CNu" id="AIR-Un-LL9"/>
                         <outlet property="bottomView" destination="rdH-jq-08L" id="zaS-n9-IKx"/>
                         <outlet property="cameraView" destination="xO8-Rl-ilf" id="QHI-Iz-8vh"/>
+                        <outlet property="drawingView" destination="SVe-aK-gOh" id="KdU-SG-0X9"/>
                         <outlet property="indicator" destination="jot-qV-InT" id="QN4-fe-Cq6"/>
                     </connections>
                 </viewController>
