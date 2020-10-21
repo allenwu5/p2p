@@ -16,7 +16,7 @@ class ImageClassificationViewController: ViewController {
     // For image segmentation
     // MARK - Core ML model
     // DeepLabV3(iOS12+), DeepLabV3FP16(iOS12+), DeepLabV3Int8LUT(iOS12+)
-    private let segmentationModel = DeepLabV3Int8LUT()
+    private let segmentationModel = DeepLabV3()
     var request: VNCoreMLRequest?
     var visionModel: VNCoreMLModel?
     var isInferencing = false
@@ -122,8 +122,6 @@ class ImageClassificationViewController: ViewController {
         self.clearDrawings()
         let facesBoundingBoxes: [CAShapeLayer] = observedFaces.flatMap({ (observedFace: VNFaceObservation) -> [CAShapeLayer] in
             var faceBoundingBoxOnScreen = previewView.previewLayer.layerRectConverted(fromMetadataOutputRect: observedFace.boundingBox)
-            // FIXME: why dy = 22 ?
-            faceBoundingBoxOnScreen = faceBoundingBoxOnScreen.offsetBy(dx: 0, dy: 22)
             let faceBoundingBoxPath = CGPath(rect: faceBoundingBoxOnScreen, transform: nil)
             let faceBoundingBoxShape = CAShapeLayer()
             faceBoundingBoxShape.path = faceBoundingBoxPath
@@ -136,7 +134,7 @@ class ImageClassificationViewController: ViewController {
             }
             return newDrawings
         })
-        facesBoundingBoxes.forEach({ faceBoundingBox in self.view.layer.addSublayer(faceBoundingBox) })
+        facesBoundingBoxes.forEach({ faceBoundingBox in self.drawingView.layer.addSublayer(faceBoundingBox) })
         self.drawings = facesBoundingBoxes
     }
     
@@ -167,7 +165,7 @@ class ImageClassificationViewController: ViewController {
         let eyePathPoints = eye.normalizedPoints
             .map({ eyePoint in
                 CGPoint(
-                    x: (1-eyePoint.y) * screenBoundingBox.height + screenBoundingBox.origin.x,
+                    x: eyePoint.y * screenBoundingBox.height + screenBoundingBox.origin.x,
                     y: eyePoint.x * screenBoundingBox.width + screenBoundingBox.origin.y)
              })
         eyePath.addLines(between: eyePathPoints)
@@ -185,7 +183,7 @@ class ImageClassificationViewController: ViewController {
         var eyePathPoints = leftEye.normalizedPoints
             .map({ eyePoint in
                 CGPoint(
-                    x: (1-eyePoint.y) * screenBoundingBox.height + screenBoundingBox.origin.x,
+                    x: eyePoint.y * screenBoundingBox.height + screenBoundingBox.origin.x,
                     y: eyePoint.x * screenBoundingBox.width + screenBoundingBox.origin.y)
              })
         eyePath.addLines(between: eyePathPoints)
@@ -193,7 +191,7 @@ class ImageClassificationViewController: ViewController {
         eyePathPoints = rightEye.normalizedPoints
             .map({ eyePoint in
                 CGPoint(
-                    x: (1-eyePoint.y) * screenBoundingBox.height + screenBoundingBox.origin.x,
+                    x: eyePoint.y * screenBoundingBox.height + screenBoundingBox.origin.x,
                     y: eyePoint.x * screenBoundingBox.width + screenBoundingBox.origin.y)
              })
         eyePath.addLines(between: eyePathPoints)
