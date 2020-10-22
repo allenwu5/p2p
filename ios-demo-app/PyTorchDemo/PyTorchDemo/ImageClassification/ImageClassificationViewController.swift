@@ -10,6 +10,7 @@ class ImageClassificationViewController: ViewController {
     private var cameraController = CameraController()
     private let delayMs: Double = 500
     private var prevTimestampMs: Double = 0.0
+    @IBOutlet var eyeMaskView: UIView!
     private var drawings: [CAShapeLayer] = []
     @IBOutlet weak var drawingView: DrawingSegmentationView!
     
@@ -101,6 +102,8 @@ class ImageClassificationViewController: ViewController {
                 }
             }
         }
+                
+        self.cameraView.layer.mask = self.drawingView.layer
     }
     
     // https://medium.com/onfido-tech/live-face-tracking-on-ios-using-vision-framework-adf8a1799233
@@ -121,7 +124,7 @@ class ImageClassificationViewController: ViewController {
     private func handleFaceDetectionResults(_ observedFaces: [VNFaceObservation], previewView:CameraPreviewView) {
         self.clearDrawings()
         let facesBoundingBoxes: [CAShapeLayer] = observedFaces.flatMap({ (observedFace: VNFaceObservation) -> [CAShapeLayer] in
-            var faceBoundingBoxOnScreen = previewView.previewLayer.layerRectConverted(fromMetadataOutputRect: observedFace.boundingBox)
+            let faceBoundingBoxOnScreen = previewView.previewLayer.layerRectConverted(fromMetadataOutputRect: observedFace.boundingBox)
             let faceBoundingBoxPath = CGPath(rect: faceBoundingBoxOnScreen, transform: nil)
             let faceBoundingBoxShape = CAShapeLayer()
             faceBoundingBoxShape.path = faceBoundingBoxPath
@@ -134,7 +137,7 @@ class ImageClassificationViewController: ViewController {
             }
             return newDrawings
         })
-        facesBoundingBoxes.forEach({ faceBoundingBox in self.drawingView.layer.addSublayer(faceBoundingBox) })
+        facesBoundingBoxes.forEach({ faceBoundingBox in self.eyeMaskView.layer.addSublayer(faceBoundingBox) })
         self.drawings = facesBoundingBoxes
     }
     
@@ -203,8 +206,8 @@ class ImageClassificationViewController: ViewController {
         let eyeDrawing = CAShapeLayer()
         eyeDrawing.path = path
         eyeDrawing.fillColor = UIColor.black.cgColor
-        eyeDrawing.strokeColor = UIColor.white.cgColor
-        eyeDrawing.lineWidth = 5.0
+        eyeDrawing.strokeColor = eyeDrawing.fillColor
+        eyeDrawing.lineWidth = 10.0
         
         return eyeDrawing
     }

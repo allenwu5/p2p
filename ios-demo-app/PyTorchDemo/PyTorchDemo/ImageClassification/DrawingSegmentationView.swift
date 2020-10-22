@@ -6,17 +6,22 @@
 //  Copyright © 2019 Doyoung Gwak. All rights reserved.
 //
 
+// Ref: https://github.com/tucan9389/SemanticSegmentation-CoreML/blob/master/SemanticSegmentation-CoreML/DrawingSegmentationView.swift
+
 import UIKit
 
 class DrawingSegmentationView: UIView {
-    
-    static private var colors: [Int32: UIColor] = [:]
-    
+    // Alpha = 0 if nothing been detected
+    static private let zeroAlpha = UIColor(red: 0, green: 0, blue: 0, alpha: 0)
+    static private var colors: [Int32 : UIColor] = [0: zeroAlpha, 20: zeroAlpha]
+
     func segmentationColor(with index: Int32) -> UIColor {
         if let color = DrawingSegmentationView.colors[index] {
             return color
         } else {
-            let color = UIColor(hue: CGFloat(index) / CGFloat(30), saturation: 1, brightness: 1, alpha: 0.5)
+//            let alpha = 0.5
+            let alpha = 1
+            let color = UIColor(hue: CGFloat(index) / CGFloat(30), saturation: 1, brightness: 1, alpha: CGFloat(alpha))
             print(index)
             DrawingSegmentationView.colors[index] = color
             return color
